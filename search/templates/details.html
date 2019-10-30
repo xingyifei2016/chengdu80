@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+
+{% block extra_headers %}
+<script type="text/javascript" src="/static/js/jquery.tablesorter.js"></script> 
+{% endblock %}
+
+{% block js_content %}
+<script>
+jQuery(document).ready(function($) {
+    $(".clickable-row").click(function() {
+        window.location = $(this).data("href");
+    });
+    $("[data-toggle=popover]").popover({ trigger: 'hover' });
+});
+</script>
+
+<script>
+$(document).ready(function() 
+    { 
+        $("#resultsTable").tablesorter({
+            debug: false,
+            sortAppend : [[0,0]],
+            textExtraction: function(node) { 
+                // sort Modules row by number of highlights but return other text unmodified
+                var marks = node.getElementsByTagName("mark");
+                if(marks.length === 0){
+                    return node.innerHTML;
+                }
+                var domains = [];
+                for(var i = 0; i < marks.length; i++){
+                    mark = marks[i];
+                    if(mark.getAttribute(["style"]) == "padding: 0; background-color: orange;"){
+                        // counter++;
+                        domains.push(mark.getAttribute(["data-domain"]));
+                    }
+                }
+                var uniqueDomains = domains.filter(function(item, i, ar){ return ar.indexOf(item) === i; });
+                return uniqueDomains.length;
+            } 
+        }); 
+    } 
+); 
+</script>
+
+{% endblock %}
+
+{% block subtitle %}
+sequence hits
+{% endblock %}
+
+{% block content %}
+<div class="row-fluid">
+<h1> Query Result </h1>
+<br>
+<div class="row">
+    <div class="col-md-6">
+         <img src = {{imageurl1}}>
+    </div>
+    <br>
+    <div class="col-md-5">
+        <dt>Name</dt>
+        <dd><font face="Georgia" font size = "5" color="gray">{{ researchName }}</font></dd>
+    </div>
+    <div class="col-md-5">
+        <dt>Field</dt>
+        <dd><font face="Georgia" font size = "5" color="gray">{{ field }}</font></dd>
+    </div>
+    <div class="col-md-5">
+        <dt>Affiliation</dt>
+        <dd><font face="Georgia" font size = "5" color="gray">{{ affiliation }}</font></dd>
+    </div>
+    <div class="col-md-5">
+        <dt>Search Time</dt>
+        <dd><font face="Georgia" font size = "5" color="gray">{{ timeTaken }} sec</font></dd>
+    </div>
+    </div>
+</div>
+
+<br>
+<!-- <center>
+<div class="row-fluid">
+<div class="btn-group" role="group">
+    <select data-domainselect="AT" class="selectpicker" data-style="btn btn-default" multiple data-actions-box="true" title="Highlight AT substrates" data-selected-text-format="count">
+      {% for substrate in atsubstrates %}
+      <option value="{{ substrate }}">AT substrate {{ substrate }}</option>
+      {% endfor %}
+    </select>
+</div>
+<div class="btn-group" role="group">
+    <select data-domainselect="KR" class="selectpicker" data-style="btn btn-default" multiple data-actions-box="true" title="Highlight KR types" data-selected-text-format="count">
+      {% for type in krtypes %}
+      <option value="{{ type }}">KR type {{ type }}</option>
+      {% endfor %}
+    </select>
+</div>
+</center> -->
+<h2>Relevant Papers</h2>
+<center>
+<div class="col-md-11">
+<table id="resultsTable" class="table table-hover table-condensed" style="margin: 0px auto;">
+<thead>
+<tr>
+    <th class="text-right">
+        Hit 
+    </th>
+    <th class="text-right">
+       Coauthors
+    </th>
+    <th class="text-right">
+       Field
+    </th>
+    <th class="text-right">
+       Title
+    </th>
+</tr>
+</thead>
+<tbody>
+{% for rank in ranking %}
+
+<!-- <tr class="clickable-row" data-container="body" data-href="/search/{{ rank.title }}/{% if alignment.hsps.0.modules|length > 0 %}?mark={% for module in alignment.hsps.0.modules %}{% if forloop.counter != 1 %},{% endif %}{{ module.module.order }}{% endfor %};{% endif %}#{{ alignment.subunit.name }}">
+
+ -->
+<tr class="clickable-row" data-container="body" data-href="/search/{{ rank.title }}/ {% if forloop.counter != 1 %},{% endif %}">
+        <td class="text-right">
+            {{ forloop.counter }}
+        </td>
+        <td class="text-right">
+            {{ rank.coauthors }}
+        </td>
+        <td class="text-right">
+            {{ rank.field }}
+        </td>
+        <td class="text-right">
+            {{ rank.title }}
+        </td>
+        
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</center>
+
+
+<br/>
+<br>
+<center><h2> Collaboration Network </h2></center>
+<center><img src = {{imageurl2}}></center>
+</div>
+
+{% endblock %}

@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block subtitle %}
+sequence search
+{% endblock %}
+
+{% block extra_headers %}
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<link rel="stylesheet" href="/static/css/home.css" type="text/css">
+{% endblock %}
+
+{% block js_content %}
+<script type="text/javascript">
+function do_example(){
+   $("#researchName").val('John Denero');
+   $("#paperName").val('CS61A');
+   $("#affiliation").val('UC Berkeley');
+   $("#journal").val('Berkeley News');
+}
+$(document).ready(function() {
+$("#loadexample").click(function() {
+do_example();
+return false;
+});
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="row-fluid">
+<div class="span12">
+<h1>
+    <center>
+        <img src="/static/footer/title.png" width="320" height="150">
+        <br/>
+        <small class="text-muted"><font face="Georgia" color="gray" font size = "3" >Financial Researcher Exploration Engine</font></small>
+    </center>
+
+</h1>
+</div>
+</div><!--/row-->
+
+<!-- <br>
+<div class="container">
+    <form action="." method="post" class="parent">
+        <input type="text"  placeholder=" Enter a desired researcher">
+        <input type="button" value="Search" type="submit">
+    </form>
+</div>
+<br> -->
+
+<div class="row-fluid">
+<form action="." method="post" accept-charset="utf-8">
+{% csrf_token %}
+<br>
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="researchName">
+                <font>Researcher Name</font>
+            </label>
+          <textarea class="form-control" rows="1" size="22" name="researchName" id="researchName" placeholder=" Enter a desired researcher">{{ researchName }}</textarea>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="paperName">
+                <font>Paper Title</font>
+            </label>
+          <textarea class="form-control" rows="1" name="paperName" id="paperName" placeholder=" Enter a desired paper">{{ paperName }}</textarea>
+        </div>
+    </div>
+</div>
+
+<br>
+
+<div class="row">
+    <div class="col-md-4 col-sm-5">
+
+        <div class="form-group">
+          <label for="affiliation">Affiliation</label>
+          <input type="text" class="form-control" id="affiliation" name="affiliation" placeholder=" Enter a desired affiliation"/>
+        </div>
+
+    </div>
+    <div class="col-md-4 col-sm-5">
+
+        <div class="form-group">
+          <label for="journal">Journal</label>
+            <input type="text" class="form-control" id="journal" name="journal" placeholder=" Enter a desired journal"/>
+        </div>
+
+    </div>
+    <div class="col-md-4 col-sm-5">
+        <div class="form-group">
+          <label for="field">Field</label>
+                <select class="form-control" name="field" id="field" placeholder=" Enter a desired Field">
+                    <option value="1">All domains in overlapping modules</option>
+                    <option value="0">Only domains overlapping</option>
+                </select>
+        </div>
+
+    </div>
+    
+</div>
+
+<br>
+<br>
+<div class="row">
+    <div class="col-md-12">
+        <center>
+        <div class="form-group">
+            <div class="btn-group">
+                <button class="btn btn-primary" type="submit">Search</button>
+                <button class="btn btn-default" id="loadexample">Load an example query</button>
+                <button class="btn btn-default" type="reset">Reset entry field</button>
+            </div>
+        </div>
+        </center>
+    </div>
+</div>
+	
+</form>
+</div>
+{% endblock %}
