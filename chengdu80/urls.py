@@ -21,6 +21,7 @@ urlpatterns = [
     path('', TemplateView.as_view(template_name='home.html')),
 	path('search/', include('search.urls')),
     path('admin/', admin.site.urls),
-    path('about/', TemplateView.as_view(template_name='about.html'))
+    path('about/', TemplateView.as_view(template_name='about.html')),
+    path('accounts/', include('django.contrib.auth.urls')),
 ]
 

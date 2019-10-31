@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[88]:
+# In[64]:
 
 
 import re
@@ -9,28 +9,29 @@ import unicodedata
 import logging
 
 
-# In[89]:
+# In[65]:
 
 
 from collections import defaultdict
 
 
-# In[90]:
+# In[66]:
 
 
 import numpy as np
 import scipy.sparse as sp
 import scipy.sparse.sparsetools as sptools
 import logging
+import pandas as pd
 
 
-# In[91]:
+# In[67]:
 
 
-STOP_WORDS_FILENAME = r'/Users/yifeixing/desktop/stop_words.txt'
+STOP_WORDS_FILENAME = '/Users/yifeixing/desktop/chengdu80/search/stop_words.txt'
 
 
-# In[92]:
+# In[68]:
 
 
 class Indexable(object):
@@ -116,7 +117,7 @@ class Indexable(object):
         return self.words_count[word] if word in self.words_count else 0
 
 
-# In[93]:
+# In[69]:
 
 
 class IndexableResult(object):
@@ -141,9 +142,9 @@ class IndexableResult(object):
 
         self.indexable = indexable
 
-    def __repr__(self):
+    #def __repr__(self):
 
-        return 'score: %f, indexable: %s' % (self.score, self.indexable)
+    #    return {'score':self.score, 'indexable': self.indexable} #'score: %f, indexable: %s' % (self.score, self.indexable)
 
     def __eq__(self, other):
 
@@ -158,7 +159,7 @@ class IndexableResult(object):
         return not self.__eq__(other)
 
 
-# In[110]:
+# In[70]:
 
 
 class TfidfRank(object):
@@ -383,11 +384,136 @@ class TfidfRank(object):
             term_index = self.vocabulary[term]
 
             score += self.tf_idf_matrix[doc_index, term_index]
-        
+            
         return score
 
 
-# In[95]:
+# In[71]:
+
+
+class RelevanceRank(object):
+
+
+    def __init__(self, stop_words, smoothing=1):
+
+        self.stop_words = stop_words
+
+        self.vocabulary = {}
+        
+        self.ft_matrix = []
+        
+
+    def build_rank(self, objects):
+
+        """Build tf-idf ranking score for terms in the corpus.
+
+        Note:
+
+          The code in this method could have been extracted to other smaller
+
+          methods, improving legibility. This extraction has not been done so
+
+          that its runtime complexity can be computed easily (the runtime
+
+          complexity can be improved).
+
+        Args:
+
+          objects (list of Indexable): List of indexed objects that will be
+
+            considered during tf-idf score computation.
+
+        """
+
+        self.__build_vocabulary(objects)
+
+        n_terms = len(self.vocabulary)
+
+        n_docs = len(objects)
+
+        ft_matrix = sp.lil_matrix((n_docs, n_terms), dtype=np.dtype(float))
+
+        #logger.info('Vocabulary assembled with terms count %s', n_terms)
+
+        # compute idf
+
+        #logger.info('Starting tf computation...')
+
+        for index, indexable in enumerate(objects):
+
+            for word in indexable.words_generator(self.stop_words):
+
+                word_index_in_vocabulary = self.vocabulary[word]
+
+                #doc_word_count = indexable.count_for_word(word)
+                                
+                #if doc_word_count >= 2:
+                    
+                #    doc_word_count = 2
+
+                ft_matrix[index, word_index_in_vocabulary] = 1 #doc_word_count
+
+        self.ft_matrix = ft_matrix
+        
+
+    def __build_vocabulary(self, objects):
+
+        """Build vocabulary with indexable objects.
+
+        Args:
+
+          objects (list of Indexable): Indexed objects that will be
+
+            considered during ranking.
+
+        """
+
+        vocabulary_index = 0
+
+        for indexable in objects:
+
+            for word in indexable.words_generator(self.stop_words):
+
+                if word not in self.vocabulary:
+
+                    self.vocabulary[word] = vocabulary_index
+
+                    vocabulary_index += 1
+
+
+    def compute_rank(self, doc_index, terms):
+
+        """Compute tf-idf score of an indexed document.
+
+        Args:
+
+          doc_index (int): Index of the document to be ranked.
+
+          terms (list of str): List of query terms.
+
+        Returns:
+
+          float: tf-idf of document identified by its index.
+
+        """
+
+        score = 0
+
+        for term in terms:
+
+          try:
+
+            term_index = self.vocabulary[term]
+
+          except KeyError:
+            continue
+
+          score += self.ft_matrix[doc_index, term_index]
+            
+        return score
+
+
+# In[72]:
 
 
 class Index(object):
@@ -479,12 +605,14 @@ class Index(object):
 
             if term not in self.term_index:
 
-                docs_indices = []
+                #docs_indices = []
+                
+                continue
 
-                break
+                #break
 
             # compute intersection between results
-
+            
             # there is room for improvements in this part of the code
 
             docs_with_term = self.term_index[term]
@@ -495,12 +623,12 @@ class Index(object):
 
             else:
 
-                docs_indices = set(docs_indices) & set(docs_with_term)
+                docs_indices = set(docs_indices) | set(docs_with_term)
 
         return list(docs_indices)
 
 
-# In[96]:
+# In[73]:
 
 
 class SearchEngine(object):
@@ -523,17 +651,17 @@ class SearchEngine(object):
 
     """
 
-    def __init__(self):
+    def __init__(self, STOP_WORDS_FILENAME):
 
         self.objects = []
 
-        self.stop_words = self.__load_stop_words()
+        self.stop_words = self.__load_stop_words(STOP_WORDS_FILENAME)
 
-        self.rank = TfidfRank(self.stop_words)
+        self.rank = RelevanceRank(self.stop_words)
 
         self.index = Index(self.stop_words)
 
-    def __load_stop_words(self):
+    def __load_stop_words(self, STOP_WORDS_FILENAME):
 
         """Load stop words that will be filtered during docs processing.
 
@@ -624,7 +752,7 @@ class SearchEngine(object):
         terms = query.lower().split()
 
         docs_indices = self.index.search_terms(terms)
-
+        
         search_results = []
 
         for doc_index in docs_indices:
@@ -634,10 +762,14 @@ class SearchEngine(object):
             doc_score = self.rank.compute_rank(doc_index, terms)
 
             result = IndexableResult(doc_score, indexable)
-
-            search_results.append(result)
-
-        search_results.sort(key=lambda x: x.score, reverse=True)
+            
+            search_results.append({'score': result.score, 'id': result.indexable.iid, 'professor': result.indexable.PROFESSOR, 
+                                   'institute': result.indexable.INSTITUTE, 'expertise': result.indexable.EXPERTISE, 'URL': result.indexable.URL})
+        search_results = list(np.unique(np.array(search_results).astype(str)))
+        search_results = [eval(things) for things in search_results]
+            # ,'collaborator': result.indexable.collaborator
+        search_results.sort(key=lambda x: x['score'], reverse=True)
+        #search_results.sort(key=lambda x: x['citation'], reverse=True)
 
         return search_results[:n_results]
 
@@ -655,7 +787,7 @@ class SearchEngine(object):
         return len(self.objects)
 
 
-# In[97]:
+# In[75]:
 
 
 import time
@@ -681,7 +813,7 @@ def timed(fn):
     return wrapped
 
 
-# In[98]:
+# In[76]:
 
 
 class Book(Indexable):
@@ -706,20 +838,32 @@ class Book(Indexable):
 
     """
 
-    def __init__(self, iid, title, author, metadata):
+    def __init__(self, iid, professor, expertise, institute, PROFESSOR, EXPERTISE, INSTITUTE, URL, metadata): #collaborator, metadata):
 
         Indexable.__init__(self, iid, metadata)
 
-        self.title = title
+        self.professor = professor
 
-        self.author = author
+        self.expertise = expertise
+        
+        self.institute = institute
 
-    def __repr__(self):
+        self.PROFESSOR = PROFESSOR
 
-        return 'id: %s, title: %s, author: %s' % (self.iid, self.title, self.author)
+        self.EXPERTISE = EXPERTISE
+
+        self.INSTITUTE = INSTITUTE
+
+        self.URL = URL
+        
+        #self.collaborator = collaborator
+
+    #def __repr__(self):
+
+        #return 'id: %s, title: %s, author: %s' % (self.iid, self.title, self.author)
 
 
-# In[99]:
+# In[77]:
 
 
 class BookDataPreprocessor(object):
@@ -734,7 +878,7 @@ class BookDataPreprocessor(object):
 
         # detect punctuation characters
 
-        r"(?P<p>(\.+)|(\?+)|(!+)|(:+)|(;+)|"
+        r"(?P<p>(\.+)|(\?+)|(!+)|(:+)|(;+)|(:;+)"
 
         # detect special characters
 
@@ -788,7 +932,7 @@ class BookDataPreprocessor(object):
         return unicodedata.normalize('NFD', text).encode('ascii', 'ignore')
 
 
-# In[100]:
+# In[78]:
 
 
 class BookInventory(object):
@@ -809,19 +953,25 @@ class BookInventory(object):
 
     _BOOK_META_ID_INDEX = 0
 
-    _BOOK_META_TITLE_INDEX = 1
+    _BOOK_META_PROFESSOR_INDEX = 1
 
-    _BOOK_META_AUTHOR_INDEX = 2
+    _BOOK_META_EXPERTISE_INDEX = 2
+    
+    _BOOK_META_INSTITUTE_INDEX = 3
+
+    _BOOK_META_URL_INDEX = 4
+    
+    #_BOOK_META_COLLABORATOR_INDEX = 4
 
     _NO_RESULTS_MESSAGE = 'Sorry, no results.'
 
 
 
-    def __init__(self, filename):
+    def __init__(self, filename, stop_words):
 
         self.filename = filename
 
-        self.engine = SearchEngine()
+        self.engine = SearchEngine(stop_words)
 
     @timed
 
@@ -847,15 +997,36 @@ class BookInventory(object):
 
                 book_desc = processor.preprocess(entry)
 
-                metadata = ' '.join(book_desc[self._BOOK_META_TITLE_INDEX:])
+                metadata = ' '.join(book_desc[self._BOOK_META_PROFESSOR_INDEX:self._BOOK_META_URL_INDEX])
 
                 iid = book_desc[self._BOOK_META_ID_INDEX].strip()
 
-                title = book_desc[self._BOOK_META_TITLE_INDEX].strip()
+                professor = book_desc[self._BOOK_META_PROFESSOR_INDEX].strip()
 
-                author = book_desc[self._BOOK_META_AUTHOR_INDEX].strip()
+                f_entry = entry.replace('\t', '|').strip()
 
-                book = Book(iid, title, author, metadata)
+                if not isinstance(f_entry, str):
+                  f_entry = unicodedata.normalize('NFD', (str(f_entry, 'utf-8'))).encode('ascii', 'ignore')
+
+                f_entry = re.compile(r'\s+', re.IGNORECASE).sub(' ', f_entry)
+
+                f_entry_ = f_entry.split('|')
+
+                PROFESSOR = f_entry_[self._BOOK_META_PROFESSOR_INDEX]
+
+                expertise = book_desc[self._BOOK_META_EXPERTISE_INDEX].strip()
+
+                EXPERTISE = f_entry_[self._BOOK_META_EXPERTISE_INDEX]
+                
+                institute = book_desc[self._BOOK_META_INSTITUTE_INDEX].strip()
+
+                INSTITUTE = f_entry_[self._BOOK_META_INSTITUTE_INDEX]
+
+                URL = f_entry_[self._BOOK_META_URL_INDEX]
+                
+                #collaborator = book_desc[self._BOOK_META_COLLABORATOR_INDEX].strip()
+
+                book = Book(iid, professor, expertise, institute, PROFESSOR, EXPERTISE, INSTITUTE, URL, metadata) #collaborator
 
                 self.engine.add_object(book)
 
@@ -887,15 +1058,15 @@ class BookInventory(object):
 
         """
 
-        result = ''
 
         if len(query) > 0:
 
             result = self.engine.search(query, n_results)
-
+        
+        
         if len(result) > 0:
-
-            return '\n'.join([str(indexable) for indexable in result])
+            
+            return [indexable for indexable in result]
 
         return self._NO_RESULTS_MESSAGE
 
@@ -912,46 +1083,7 @@ class BookInventory(object):
         return self.engine.count()
 
 
-# In[120]:
-
-
-def execute_search(data_location, query):
-
-    """Capture query from STDIN and display the result on STDOUT.
-
-    The query of terms is executed against an indexed data structure
-
-    containing books' information. If not result is found, an warning message
-
-    will notify the user of such situation.
-
-    Args:
-
-      data_location (str): Location of the data file that will be indexed.
-
-    """
-
-    #query = None
-
-    repository = BookInventory(data_location)
-
-    #logger.info('Loading books...')
-
-    repository.load_books()
-
-    docs_number = repository.books_count()
-
-    #logger.info('Done loading books, %d docs in index', docs_number)
-
-    #while query is not '':
-
-    #query = 'Tower'
-
-    search_results = repository.search_books(query)
-
-    return search_results
-
-
+# In[79]:
 
 
 

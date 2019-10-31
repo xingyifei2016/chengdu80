@@ -42,12 +42,41 @@ $(document).ready(function()
     } 
 ); 
 
-$('[infos]').tooltip({
-  title: "This is the hit",
+$('[info1]').tooltip({
+  title: "This is the position of which the person was returned by our system",
   trigger: 'hover',
   container : 'body'
 });
 
+$('[info2]').tooltip({
+  title: "The name of the researcher",
+  trigger: 'hover',
+  container : 'body'
+});
+
+$('[info3]').tooltip({
+  title: "This variable measures the degree of relevance of this result to the query",
+  trigger: 'hover',
+  container : 'body'
+});
+
+$('[info4]').tooltip({
+  title: "Institute of which this person belongs to",
+  trigger: 'hover',
+  container : 'body'
+});
+
+$('[info5]').tooltip({
+  title: "This person specializes in the following fields",
+  trigger: 'hover',
+  container : 'body'
+});
+
+$('[info6]').tooltip({
+  title: "The unique identification number of the researcher",
+  trigger: 'hover',
+  container : 'body'
+});
 
 </script>
 
@@ -61,64 +90,84 @@ sequence hits
 <div class="row-fluid">
 <h1> Query Result </h1>
 <br>
-<div class="row">
-    <div class="col-md-6">
-         <img src = {{imageurl1}}>
-    </div>
-    <br>
-    <div class="col-md-5">
+<center><img src = {{imageurl1}}></center>
+
+
+<!-- <div class="column">
+    <div class="col-md-5" align="right">
         <dt>Name</dt>
         <dd><font face="Georgia" font size = "5" color="gray">{{ researchName }}</font></dd>
     </div>
-    <div class="col-md-5">
+    <div class="col-md-5" align="right">
         <dt>Field</dt>
         <dd><font face="Georgia" font size = "5" color="gray">{{ field }}</font></dd>
     </div>
-    <div class="col-md-5">
+    <div class="col-md-5" align="right">
         <dt>Affiliation</dt>
         <dd><font face="Georgia" font size = "5" color="gray">{{ affiliation }}</font></dd>
     </div>
-    <div class="col-md-5">
+    <div class="col-md-5" align="right">
         <dt>Search Time</dt>
         <dd><font face="Georgia" font size = "5" color="gray">{{ timeTaken }} sec</font></dd>
     </div>
+    <div class="col-md-5" align="right">
+        <dt>Number of Visits</dt>
+        <dd><font face="Georgia" font size = "5" color="gray">{{ num_visits }} Times</font></dd>
     </div>
-</div>
+    </div>
+</div> -->
 
 <br>
-<!-- <center>
+<br>
+<script>
+$(document).ready(function(){
+    $('[data-domainselect]').change(function(){
+       var domain = $(this).attr("data-domainselect");
+       var types = $(this).selectpicker('val');
+       $('[data-domain="' + domain + '"]').attr("style", "padding: 0; background-color: transparent;"); 
+       if (types !== null){
+           $.each(types, function(index,value){
+                if (value){
+                    $('[data-domain="' + domain + '"][data-type="' + value + '"]').attr("style", "padding: 0; background-color: orange;"); 
+                }
+           });
+       }
+       // update table cache and re-sort each time highlights are changed
+       var sortlist = [[7,1], [0,0]]
+       $("#resultsTable").trigger("update").trigger("sorton", [sortlist]);
+    });
+});
+
+</script>
+
 <div class="row-fluid">
-<div class="btn-group" role="group">
-    <select data-domainselect="AT" class="selectpicker" data-style="btn btn-default" multiple data-actions-box="true" title="Highlight AT substrates" data-selected-text-format="count">
-      {% for substrate in atsubstrates %}
-      <option value="{{ substrate }}">AT substrate {{ substrate }}</option>
+ <div class="btn-group" role="group">
+    <select class="selectpicker" data-style="btn btn-default" multiple data-actions-box="true" title="Highlight AT substrates" data-selected-text-format="count">
+      {% for rank in ranking %}
+      <option  data-domainselect="{{ rank.expertise }}" value="{{ rank.expertise }}"> {{ rank.expertise }}</option>
       {% endfor %}
     </select>
-</div>
-<div class="btn-group" role="group">
-    <select data-domainselect="KR" class="selectpicker" data-style="btn btn-default" multiple data-actions-box="true" title="Highlight KR types" data-selected-text-format="count">
-      {% for type in krtypes %}
-      <option value="{{ type }}">KR type {{ type }}</option>
-      {% endfor %}
-    </select>
-</div>
-</center> -->
+  </div>
+
+
 <center>
-<div class="col-md-11">
 <table id="resultsTable" class="table table-hover table-condensed" style="margin: 0px auto;">
 <thead>
 <tr>
-    <th class="text-right">
+    <th>
         Hit 
     </th>
-    <th class="text-right">
-       Score0
+    <th>
+        Name
     </th>
-    <th class="text-right">
-       Score1
+    <th>
+       Relevance Score
     </th>
-    <th class="text-right">
-       Title
+    <th>
+       Institute
+    </th>
+    <th>
+       Expertise
     </th>
 </tr>
 </thead>
@@ -128,32 +177,31 @@ sequence hits
 <!-- <tr class="clickable-row" data-container="body" data-href="/search/{{ rank.title }}/{% if alignment.hsps.0.modules|length > 0 %}?mark={% for module in alignment.hsps.0.modules %}{% if forloop.counter != 1 %},{% endif %}{{ module.module.order }}{% endfor %};{% endif %}#{{ alignment.subunit.name }}">
 
  -->
-<tr class="clickable-row" data-container="body" data-href="/search/{{ rank.title }}/ {% if forloop.counter != 1 %},{% endif %}">
-        <td class="text-right" infos=1>
+<tr class="clickable-row" data-container="body" data-href="/search/{{ rank.professor }}/ {% if forloop.counter != 1 %},{% endif %}">
+        <td info1=1 width=20>
             {{ forloop.counter }}
         </td>
-        <td class="text-right">
-            {{ rank.score0 }}
+        <td info2=2 width=20 tooltip= {{ forloop.counter }}>
+            {{ rank.professor }}
         </td>
-        <td class="text-right">
-            {{ rank.score1 }}
+        <td info3=3 width=20>
+            {{ rank.score }}
         </td>
-        <td class="text-right">
-            {{ rank.title }}
+        <td info4=4 width=20>
+            {{ rank.institute }}
         </td>
+        <td info5=5 width=20>
+            <mark data-domain="{{ rank.expertise }}"  data-type="{{ rank.expertise }}" style="padding:0; background-color: transparent;">{% if rank.expertise %}{{ rank.expertise }}{% else %} N/A {% endif %}</mark>
         
 </tr>
 {% endfor %}
 </tbody>
 </table>
-</div>
 </center>
 
 
 <br/>
 <br>
-<center><h2> Collaboration Network </h2></center>
-<center><img src = {{imageurl2}}></center>
 </div>
 
 {% endblock %}

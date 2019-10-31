@@ -30,7 +30,7 @@ $(document).ready(function()
                 var domains = [];
                 for(var i = 0; i < marks.length; i++){
                     mark = marks[i];
-                    if(mark.getAttribute(["style"]) == "padding: 0; background-color: orange;"){
+                    if (mark.getAttribute(["style"]) == "padding: 0; background-color: orange;"){
                         // counter++;
                         domains.push(mark.getAttribute(["data-domain"]));
                     }
@@ -55,7 +55,7 @@ sequence hits
 <br>
 <div class="row">
     <div class="col-md-6">
-         <img src = {{imageurl1}}>
+         <img src = {{imageurl1}} width=100%>
     </div>
     <br>
     <div class="col-md-5">
@@ -78,23 +78,36 @@ sequence hits
 </div>
 
 <br>
-<!-- <center>
-<div class="row-fluid">
+
+<script>
+$(document).ready(function(){
+    $('[data-domainselect]').change(function(){
+       var domain = $(this).attr("data-domainselect");
+       var types = $(this).selectpicker('val');
+       $('[data-domain="' + domain + '"]').attr("style", "padding: 0; background-color: transparent;"); 
+       if (types !== null){
+           $.each(types, function(index,value){
+                if (value){
+                    $('[data-domain="' + domain + '"][data-type="' + value + '"]').attr("style", "padding: 0; background-color: orange;"); 
+                }
+           });
+       }
+       // update table cache and re-sort each time highlights are changed
+       var sortlist = [[7,1], [0,0]]
+       $("#resultsTable").trigger("update").trigger("sorton", [sortlist]);
+    });
+});
+</script>
+
 <div class="btn-group" role="group">
-    <select data-domainselect="AT" class="selectpicker" data-style="btn btn-default" multiple data-actions-box="true" title="Highlight AT substrates" data-selected-text-format="count">
-      {% for substrate in atsubstrates %}
-      <option value="{{ substrate }}">AT substrate {{ substrate }}</option>
+    <select data-domainselect="TE" class="selectpicker" data-style="btn btn-default" multiple data-actions-box="true" title="Highlight TE types" data-selected-text-format="count">
+      {% for type in ranking %}
+      <option value={{type.field}}>{{type.field}}</option>
       {% endfor %}
     </select>
-</div>
-<div class="btn-group" role="group">
-    <select data-domainselect="KR" class="selectpicker" data-style="btn btn-default" multiple data-actions-box="true" title="Highlight KR types" data-selected-text-format="count">
-      {% for type in krtypes %}
-      <option value="{{ type }}">KR type {{ type }}</option>
-      {% endfor %}
-    </select>
-</div>
-</center> -->
+  </div>
+
+
 <h2>Relevant Papers</h2>
 <center>
 <div class="col-md-11">

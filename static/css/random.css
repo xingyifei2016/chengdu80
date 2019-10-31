@@ -1,0 +1,6 @@
+.imageContainer {
+       width:800px; 
+       height:500px; 
+       background-size: contain;
+       background-image: url(/static/footer/FinTech.jpg);
+ }
