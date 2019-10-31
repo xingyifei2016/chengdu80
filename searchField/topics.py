@@ -1,40 +1,49 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[64]:
+# In[123]:
 
 
+import pandas as pd
+import numpy as np
 import re
 import unicodedata
 import logging
+import scipy.sparse as sp
+import scipy.sparse.sparsetools as sptools
+import nltk.stem as stem
 
 
-# In[65]:
+# In[124]:
 
 
 from collections import defaultdict
 
 
-# In[66]:
+# In[125]:
 
 
-import numpy as np
-import scipy.sparse as sp
-import scipy.sparse.sparsetools as sptools
-import logging
-import pandas as pd
-import nltk.stem as stem
+#lala = csv_data[['author_id', 'name', 'EXPERTISE', 'ins_name\r', 'URL']]
+#lala = lala.replace({'ins_name\r': {r'\r':''}}, regex = True)
+
+#lala.to_csv(r'C:\Users\admin\Desktop\professor_data.txt', header = None, index = None, sep = '\t', mode = 'a', encoding = 'utf-8')
 
 
-# In[67]:
+# In[126]:
 
 
-STOP_WORDS_FILENAME = '/Users/yifeixing/desktop/chengdu80/search/stop_words.txt'
 
 
-# In[68]:
+# In[127]:
+
+
+STOP_WORDS_FILENAME = r'C:\Users\admin\Desktop\stop_words_topic.txt'
+
+
+# In[128]:
 
 eng_stemmer = stem.SnowballStemmer('english')
+
 
 class Indexable(object):
 
@@ -119,7 +128,7 @@ class Indexable(object):
         return self.words_count[word] if word in self.words_count else 0
 
 
-# In[69]:
+# In[129]:
 
 
 class IndexableResult(object):
@@ -161,247 +170,7 @@ class IndexableResult(object):
         return not self.__eq__(other)
 
 
-# In[70]:
-
-
-class TfidfRank(object):
-
-    """Class encapsulating tf-idf ranking logic.
-
-    Tf-idf means stands for term-frequency times inverse document-frequency
-
-    and it is a common term weighting scheme in document classification.
-
-    The goal of using tf-idf instead of the raw frequencies of occurrence of a
-
-    token in a given document is to scale down the impact of tokens that occur
-
-    very frequently in a given corpus and that are hence empirically less
-
-    informative than features that occur in a small fraction of the training
-
-    corpus.
-
-    Args:
-
-      smoothing (int, optional): Smoothing parameter for tf-idf computation
-
-        preventing by-zero divisions when a term does not occur in corpus.
-
-      stop_words (list of str): Stop words that will be filtered during docs
-
-        processing.
-
-    Attributes:
-
-      smoothing (int, optional): Smoothing parameter for tf-idf computation
-
-        preventing by-zero divisions when a term does not occur in corpus.
-
-      stop_words (list of str): Stop words that will be filtered during docs
-
-        processing.
-
-      vocabulary (dict): Dictionary containing unique words of the corpus as
-
-        keys and their respective global index used in tf-idf data structures.
-
-      ft_matrix (matrix): Matrix containing the frequency term for each term
-
-        in the corpus respecting the index stored in `vocabulary`.
-
-      ifd_diag_matrix (list): Vector containing the inverse document
-
-        frequency for each term in the corpus. It respects the index stored in
-
-        `vocabulary`.
-
-      tf_idf_matrix (matrix): Matrix containing the ft-idf score for each term
-
-        in the corpus respecting the index stored in `vocabulary`.
-
-    """
-
-    def __init__(self, stop_words, smoothing=1):
-
-        self.smoothing = smoothing
-
-        self.stop_words = stop_words
-
-        self.vocabulary = {}
-
-        self.ft_matrix = []
-
-        self.ifd_diag_matrix = []
-
-        self.tf_idf_matrix = []
-
-    def build_rank(self, objects):
-
-        """Build tf-idf ranking score for terms in the corpus.
-
-        Note:
-
-          The code in this method could have been extracted to other smaller
-
-          methods, improving legibility. This extraction has not been done so
-
-          that its runtime complexity can be computed easily (the runtime
-
-          complexity can be improved).
-
-        Args:
-
-          objects (list of Indexable): List of indexed objects that will be
-
-            considered during tf-idf score computation.
-
-        """
-
-        self.__build_vocabulary(objects)
-
-        n_terms = len(self.vocabulary)
-
-        n_docs = len(objects)
-
-        ft_matrix = sp.lil_matrix((n_docs, n_terms), dtype=np.dtype(float))
-
-        #logger.info('Vocabulary assembled with terms count %s', n_terms)
-
-        # compute idf
-
-        #logger.info('Starting tf computation...')
-
-        for index, indexable in enumerate(objects):
-
-            for word in indexable.words_generator(self.stop_words):
-
-                word = eng_stemmer.stem(word)
-
-                word_index_in_vocabulary = self.vocabulary[word]
-
-                doc_word_count = indexable.count_for_word(word)
-
-                ft_matrix[index, word_index_in_vocabulary] = doc_word_count
-
-        self.ft_matrix = ft_matrix.tocsc()
-
-
-
-        #logger.info('Starting tf-idf computation...')
-
-        # compute idf with smoothing
-
-        df = np.diff(self.ft_matrix.indptr) + self.smoothing
-
-        n_docs_smooth = n_docs + self.smoothing
-
-
-
-        # create diagonal matrix to be multiplied with ft
-
-        idf = np.log(float(n_docs_smooth) / df) + 1.0
-
-        self.ifd_diag_matrix = sp.spdiags(idf, diags=0, m=n_terms, n=n_terms)
-
-
-
-        # compute tf-idf
-
-        self.tf_idf_matrix = self.ft_matrix * self.ifd_diag_matrix
-
-        self.tf_idf_matrix = self.tf_idf_matrix.tocsr()
-
-
-
-        # compute td-idf normalization
-
-        norm = self.tf_idf_matrix.tocsr(copy=True)
-
-        norm.data **= 2
-
-        norm = norm.sum(axis=1)
-
-        n_nzeros = np.where(norm > 0)
-
-        norm[n_nzeros] = 1.0 / np.sqrt(norm[n_nzeros])
-
-        norm = np.array(norm).T[0]
-
-        sptools.csr_scale_rows(self.tf_idf_matrix.shape[0],
-
-                                      self.tf_idf_matrix.shape[1],
-
-                                      self.tf_idf_matrix.indptr,
-
-                                      self.tf_idf_matrix.indices,
-
-                                      self.tf_idf_matrix.data, norm)
-
-
-
-    def __build_vocabulary(self, objects):
-
-        """Build vocabulary with indexable objects.
-
-        Args:
-
-          objects (list of Indexable): Indexed objects that will be
-
-            considered during ranking.
-
-        """
-
-        vocabulary_index = 0
-
-        for indexable in objects:
-
-            for word in indexable.words_generator(self.stop_words):
-
-                if word not in self.vocabulary:
-
-                    word = eng_stemmer.stem(word)
-
-                    self.vocabulary[word] = vocabulary_index
-
-                    vocabulary_index += 1
-
-
-    def compute_rank(self, doc_index, terms):
-
-        """Compute tf-idf score of an indexed document.
-
-        Args:
-
-          doc_index (int): Index of the document to be ranked.
-
-          terms (list of str): List of query terms.
-
-        Returns:
-
-          float: tf-idf of document identified by its index.
-
-        """
-
-        score = 0
-
-        for term in terms:
-
-            term = eng_stemmer.stem(term)
-
-            try:
-
-              term_index = self.vocabulary[term]
-
-            except KeyError:
-              continue
-
-            score += self.tf_idf_matrix[doc_index, term_index]
-            
-        return score
-
-
-# In[71]:
+# In[130]:
 
 
 class RelevanceRank(object):
@@ -456,6 +225,8 @@ class RelevanceRank(object):
 
             for word in indexable.words_generator(self.stop_words):
 
+                word = eng_stemmer.stem(word)
+
                 word_index_in_vocabulary = self.vocabulary[word]
 
                 #doc_word_count = indexable.count_for_word(word)
@@ -487,6 +258,8 @@ class RelevanceRank(object):
 
             for word in indexable.words_generator(self.stop_words):
 
+                word = eng_stemmer.stem(word)
+
                 if word not in self.vocabulary:
 
                     self.vocabulary[word] = vocabulary_index
@@ -514,21 +287,20 @@ class RelevanceRank(object):
 
         for term in terms:
 
-          term = eng_stemmer.stem(term)
+            term = eng_stemmer.stem(term)
+            
+            try:
+                term_index = self.vocabulary[term]
+            
+            except KeyError:
+                continue
 
-          try:
-
-            term_index = self.vocabulary[term]
-
-          except KeyError:
-            continue
-
-          score += self.ft_matrix[doc_index, term_index]
+            score += self.ft_matrix[doc_index, term_index]
             
         return score
 
 
-# In[72]:
+# In[131]:
 
 
 class Index(object):
@@ -616,9 +388,9 @@ class Index(object):
 
         for term_index, term in enumerate(terms):
 
-            # keep only docs that contains all terms
-
             term = eng_stemmer.stem(term)
+
+            # keep only docs that contains all terms
 
             if term not in self.term_index:
 
@@ -631,21 +403,23 @@ class Index(object):
             # compute intersection between results
             
             # there is room for improvements in this part of the code
-
-            docs_with_term = self.term_index[term]
-
-            if term_index == 0:
-
-                docs_indices = docs_with_term
-
+            
             else:
+                
+                docs_with_term = self.term_index[term]
+                                
+                if term_index == 0:
+                    
+                    docs_indices = docs_with_term
+                    
+                else:
+                    
+                    docs_indices = set(docs_indices) | set(docs_with_term)
+                
+        return list(set(docs_indices))
 
-                docs_indices = set(docs_indices) | set(docs_with_term)
 
-        return list(docs_indices)
-
-
-# In[73]:
+# In[132]:
 
 
 class SearchEngine(object):
@@ -668,17 +442,17 @@ class SearchEngine(object):
 
     """
 
-    def __init__(self, STOP_WORDS_FILENAME):
+    def __init__(self, stop_words_file):
 
         self.objects = []
 
-        self.stop_words = self.__load_stop_words(STOP_WORDS_FILENAME)
+        self.stop_words = self.__load_stop_words(stop_words_file)
 
         self.rank = RelevanceRank(self.stop_words)
 
         self.index = Index(self.stop_words)
 
-    def __load_stop_words(self, STOP_WORDS_FILENAME):
+    def __load_stop_words(self, stop_words_file_):
 
         """Load stop words that will be filtered during docs processing.
 
@@ -695,7 +469,7 @@ class SearchEngine(object):
         """
         stop_words = {}
 
-        with open(STOP_WORDS_FILENAME) as stop_words_file:
+        with open(stop_words_file_) as stop_words_file:
 
             for word in stop_words_file:
 
@@ -773,22 +547,26 @@ class SearchEngine(object):
         search_results = []
 
         for doc_index in docs_indices:
-
+            
             indexable = self.objects[doc_index]
 
             doc_score = self.rank.compute_rank(doc_index, terms)
 
             result = IndexableResult(doc_score, indexable)
-            
-            search_results.append({'score': result.score, 'id': result.indexable.iid, 'professor': result.indexable.PROFESSOR, 
-                                   'institute': result.indexable.INSTITUTE, 'expertise': result.indexable.EXPERTISE, 'URL': result.indexable.URL})
-        search_results = list(np.unique(np.array(search_results).astype(str)))
-        search_results = [eval(things) for things in search_results]
+                        
+            search_results.append({'score': result.score, 'field': result.indexable.FIELD, 'subfield': result.indexable.SUBFIELD, 'code': result.indexable.iid})
+
             # ,'collaborator': result.indexable.collaborator
+        search_results = list(np.unique(np.array(search_results).astype(str)))
+        search_results = [eval(things) for things in search_results]  
         search_results.sort(key=lambda x: x['score'], reverse=True)
         #search_results.sort(key=lambda x: x['citation'], reverse=True)
-
-        return search_results[:n_results]
+        
+      
+        if len(search_results) <= n_results:
+            return search_results[:len(search_results)]
+        else:
+            return search_results[:n_results]
 
 
     def count(self):
@@ -804,7 +582,7 @@ class SearchEngine(object):
         return len(self.objects)
 
 
-# In[75]:
+# In[133]:
 
 
 import time
@@ -830,7 +608,7 @@ def timed(fn):
     return wrapped
 
 
-# In[76]:
+# In[134]:
 
 
 class Book(Indexable):
@@ -855,23 +633,17 @@ class Book(Indexable):
 
     """
 
-    def __init__(self, iid, professor, expertise, institute, PROFESSOR, EXPERTISE, INSTITUTE, URL, metadata): #collaborator, metadata):
+    def __init__(self, iid, field, subfield, FIELD, SUBFIELD, metadata): #collaborator, metadata):
 
         Indexable.__init__(self, iid, metadata)
 
-        self.professor = professor
+        self.field = field
 
-        self.expertise = expertise
+        self.subfield = subfield
+                
+        self.FIELD = FIELD
         
-        self.institute = institute
-
-        self.PROFESSOR = PROFESSOR
-
-        self.EXPERTISE = EXPERTISE
-
-        self.INSTITUTE = INSTITUTE
-
-        self.URL = URL
+        self.SUBFIELD = SUBFIELD
         
         #self.collaborator = collaborator
 
@@ -880,7 +652,7 @@ class Book(Indexable):
         #return 'id: %s, title: %s, author: %s' % (self.iid, self.title, self.author)
 
 
-# In[77]:
+# In[135]:
 
 
 class BookDataPreprocessor(object):
@@ -951,7 +723,7 @@ class BookDataPreprocessor(object):
         return unicodedata.normalize('NFD', text).encode('ascii', 'ignore')
 
 
-# In[78]:
+# In[136]:
 
 
 class BookInventory(object):
@@ -970,15 +742,11 @@ class BookInventory(object):
 
     """
 
-    _BOOK_META_ID_INDEX = 0
+    _BOOK_META_ID_INDEX = 2
 
-    _BOOK_META_PROFESSOR_INDEX = 1
+    _BOOK_META_FIELD_INDEX = 0
 
-    _BOOK_META_EXPERTISE_INDEX = 2
-    
-    _BOOK_META_INSTITUTE_INDEX = 3
-
-    _BOOK_META_URL_INDEX = 4
+    _BOOK_META_SUBFIELD_INDEX = 1
     
     #_BOOK_META_COLLABORATOR_INDEX = 4
 
@@ -986,11 +754,11 @@ class BookInventory(object):
 
 
 
-    def __init__(self, filename, stop_words):
+    def __init__(self, filename, stop_words_file):
 
         self.filename = filename
 
-        self.engine = SearchEngine(stop_words)
+        self.engine = SearchEngine(stop_words_file)
 
     @timed
 
@@ -1016,36 +784,30 @@ class BookInventory(object):
 
                 book_desc = processor.preprocess(entry)
 
-                metadata = ' '.join(book_desc[self._BOOK_META_PROFESSOR_INDEX:self._BOOK_META_URL_INDEX])
+                metadata = ' '.join(book_desc[self._BOOK_META_FIELD_INDEX:self._BOOK_META_ID_INDEX])
 
-                iid = book_desc[self._BOOK_META_ID_INDEX].strip()
+                #iid = book_desc[self._BOOK_META_ID_INDEX].strip()
 
-                professor = book_desc[self._BOOK_META_PROFESSOR_INDEX].strip()
-
+                field = book_desc[self._BOOK_META_FIELD_INDEX].strip()
+                
                 f_entry = entry.replace('\t', '|').strip()
-
+        
                 if not isinstance(f_entry, str):
-                  f_entry = unicodedata.normalize('NFD', (str(f_entry, 'utf-8'))).encode('ascii', 'ignore')
-
-                f_entry = re.compile(r'\s+', re.IGNORECASE).sub(' ', f_entry)
+                    f_entry = unicodedata.normalize('NFD', (str(f_entry, 'utf-8'))).encode('ascii', 'ignore')
+                    
+                f_entry =  re.compile(r'\s+', re.IGNORECASE).sub(' ', f_entry)
 
                 f_entry_ = f_entry.split('|')
-
-                PROFESSOR = f_entry_[self._BOOK_META_PROFESSOR_INDEX]
-
-                expertise = book_desc[self._BOOK_META_EXPERTISE_INDEX].strip()
-
-                EXPERTISE = f_entry_[self._BOOK_META_EXPERTISE_INDEX]
                 
-                institute = book_desc[self._BOOK_META_INSTITUTE_INDEX].strip()
+                FIELD = f_entry_[self._BOOK_META_FIELD_INDEX]
 
-                INSTITUTE = f_entry_[self._BOOK_META_INSTITUTE_INDEX]
-
-                URL = f_entry_[self._BOOK_META_URL_INDEX]
+                subfield = book_desc[self._BOOK_META_SUBFIELD_INDEX].strip()
                 
-                #collaborator = book_desc[self._BOOK_META_COLLABORATOR_INDEX].strip()
+                SUBFIELD = f_entry_[self._BOOK_META_SUBFIELD_INDEX]
+                
+                iid = f_entry_[self._BOOK_META_ID_INDEX]
 
-                book = Book(iid, professor, expertise, institute, PROFESSOR, EXPERTISE, INSTITUTE, URL, metadata) #collaborator
+                book = Book(iid, field, subfield, FIELD, SUBFIELD, metadata) #collaborator
 
                 self.engine.add_object(book)
 
@@ -1085,9 +847,10 @@ class BookInventory(object):
         
         if len(result) > 0:
             
-            return [indexable for indexable in result]
+            return result
 
         return self._NO_RESULTS_MESSAGE
+    
 
     def books_count(self):
 
@@ -1100,10 +863,4 @@ class BookInventory(object):
         """
 
         return self.engine.count()
-
-
-# In[79]:
-
-
-
 

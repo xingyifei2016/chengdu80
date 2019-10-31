@@ -12,10 +12,8 @@ sequence search
 {% block js_content %}
 <script type="text/javascript">
 function do_example(){
-   $("#researchName").val('John Denero');
-   $("#paperName").val('CS61A');
-   $("#affiliation").val('UC Berkeley');
-   $("#journal").val('Berkeley News');
+   $("#fieldName").val('Computer Science');
+   $("#subfieldName").val('Computer Vision');
 }
 $(document).ready(function() {
 $("#loadexample").click(function() {
@@ -56,55 +54,28 @@ return false;
 <div class="row">
     <div class="col-md-6">
         <div class="form-group">
-            <label for="researchName">
-                <font>Researcher Name</font>
+            <label for="fieldName">
+                <font>Field Name</font>
             </label>
-          <textarea class="form-control" rows="1" size="22" name="researchName" id="researchName" placeholder=" Enter a desired researcher">{{ researchName }}</textarea>
+          <textarea class="form-control" rows="1" size="22" name="fieldName" id="fieldName" placeholder=" Enter a desired field name">{{ fieldName }}</textarea>
         </div>
     </div>
     <div class="col-md-6">
         <div class="form-group">
-            <label for="paperName">
-                <font>Paper Title</font>
+            <label for="subfieldName">
+                <font>Subfield Name</font>
             </label>
-          <textarea class="form-control" rows="1" name="paperName" id="paperName" placeholder=" Enter a desired paper">{{ paperName }}</textarea>
+          <textarea class="form-control" rows="1" size="22" name="subfieldName" id="subfieldName" placeholder=" Enter a desired subfield name">{{ subfieldName }}</textarea>
         </div>
     </div>
 </div>
 
 <br>
-
-<div class="row">
-    <div class="col-md-4 col-sm-5">
-
-        <div class="form-group">
-          <label for="affiliation">Affiliation</label>
-          <input type="text" class="form-control" id="affiliation" name="affiliation" placeholder=" Enter a desired affiliation"/>
-        </div>
-
-    </div>
-    <div class="col-md-4 col-sm-5">
-
-        <div class="form-group">
-          <label for="journal">Journal</label>
-            <input type="text" class="form-control" id="journal" name="journal" placeholder=" Enter a desired journal"/>
-        </div>
-
-    </div>
-    <div class="col-md-4 col-sm-5">
-        <div class="form-group">
-          <label for="field">Expertise</label>
-                <input type="text" class="form-control" id="field" name="field" placeholder=" Enter a desired expertise"/>
-        </div>
-
-    </div>
-    
-</div>
 
 <br>
 
 <p>Recommended searches: 
-    {% for member in researchers %}
+    {% for member in fields %}
     <li><a href="/search/{{ member }}/">{{member}}</a></li>
     {% endfor %}
 </p>
@@ -125,5 +96,6 @@ return false;
 </div>
 	
 </form>
+
 </div>
 {% endblock %}

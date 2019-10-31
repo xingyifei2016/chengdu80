@@ -12,9 +12,12 @@ from operator import itemgetter
 import numpy as np
 import string
 import random
+import pandas as pd
+from django.http import HttpResponseRedirect
 
-STOP_WORDS_FILENAME = '/Users/yifeixing/desktop/chengdu80/static/footer/stop_words.txt'
-data_location = "/Users/yifeixing/desktop/chengdu80/static/footer/data.txt"
+
+STOP_WORDS_FILENAME = './static/footer/stop_words.txt'
+data_location = "./static/footer/data.txt"
 repository = searcher.BookInventory(data_location, STOP_WORDS_FILENAME)
 repository.load_books()
 docs_number = repository.books_count()
@@ -22,31 +25,45 @@ all_fields = ['researchName', 'paperName', 'affiliation', 'field', 'journal']
 searched_query = {i: [] for i in all_fields}
 searched_query["results"] = {}
 default_researchers = ['John Denero', 'Jay Keasling', 'Stella Yu']
-
+df = pd.read_csv('./static/footer/nodup_joined.csv')
+sample = [["Jacob Kean", "Law and Economics~Regulation and Business Law", "#8DD3C7"], ["Jamie Reilly", "Mathematical and Quantitative Methods~Econometric and Statistical Methods:  Special Topic", "#FFFFB3"], ["Jonathan Peelle", "Mathematical and Quantitative Methods~Game Theory and Bargaining Theor", "#BEBADA"]]
 
 def details(request):
     #Request is only person, find all relevant details about this person
     timeTaken = time()
-    temp_results = [{'coauthors': np.random.rand(), 'field': np.random.rand(), 'title': ''.join(random.choice(string.ascii_lowercase) for x in range(5))} for i in range(10)]
-    image_url1 = "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1572436502562&di=5a296d58b1c1ca0cbd21c9fedde519fd&imgtype=0&src=http%3A%2F%2Fi0.hdslb.com%2Fbfs%2Farticle%2Ffd1515ed28998c886a1c48acf7454f15a83b5b1b.jpg"
+    authorID = request.GET['authorID']
+
+    query = df.loc[df['author_id'] == np.float64(authorID)]
+    if len(query) == 0:
+        messages.error(request, 'Error: No researchers matched from database')
+        if len(searched_query['researchName']) == 0:
+            researchers = default_researchers
+        else:
+            researchers = sorted(searched_query['results'].keys(), key=lambda x: searched_query['results'][x], reverse=True)[:5]
+        context = {
+            'researchers': researchers,
+        }
+        return HttpResponseRedirect('/search/')
+
+    # temp_results = [{'coauthors': np.random.rand(), 'field': np.random.rand(), 'title': ''.join(random.choice(string.ascii_lowercase) for x in range(5))} for i in range(10)]
+    image_url1 = query['URL'].values[0]
     image_url2 = "/static/footer/DaronAcemoglu.png"
-    field = "Some field"
-    journal = "Some journal"
-    affiliation = "Some affiliation"
-    paperName = "Some paper"
-    researchName = "Some Name"
+    weighted_degree = query['Weighted.Degree'].values[0]
+    pagerank = query['pageranks'].values[0]
+    clustering = query['clustering'].values[0]
+    eigencentrality = query['eigencentrality'].values[0]
+    name = query['name'].values[0]
     end_time = time()
     timeTaken = int(end_time - timeTaken)
     context = {
         'imageurl1': image_url1,
         'imageurl2': image_url2,
-        'researchName': researchName,
-        'paperName': paperName,
+        'weighted_degree': weighted_degree,
+        'page': pagerank,
         'timeTaken': timeTaken,
-        'field': field,
-        'affiliation': affiliation,
-        'journal': journal,
-        'ranking': temp_results,
+        'cluster': clustering,
+        'eigen': eigencentrality,
+        'name': name,
         }
     return render(request, 'details.html', context)
 
@@ -112,6 +129,7 @@ def search(request):
         'journal': journal,
         'ranking': temp_results,
         'num_visits': num_visits,
+        'legend': sample
         }
 
         return render(request, 'results.html', context)

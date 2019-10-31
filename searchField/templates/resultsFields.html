@@ -49,31 +49,19 @@ $('[info1]').tooltip({
 });
 
 $('[info2]').tooltip({
-  title: "The name of the researcher",
+  title: "The field in interest",
   trigger: 'hover',
   container : 'body'
 });
 
 $('[info3]').tooltip({
-  title: "This variable measures the degree of relevance of this result to the query",
+  title: "The sub-field in interest",
   trigger: 'hover',
   container : 'body'
 });
 
 $('[info4]').tooltip({
-  title: "Institute of which this person belongs to",
-  trigger: 'hover',
-  container : 'body'
-});
-
-$('[info5]').tooltip({
-  title: "This person specializes in the following fields",
-  trigger: 'hover',
-  container : 'body'
-});
-
-$('[info6]').tooltip({
-  title: "The unique identification number of the researcher",
+  title: "This variable measures the degree of relevance of this result to the query",
   trigger: 'hover',
   container : 'body'
 });
@@ -122,9 +110,9 @@ sequence hits
 <script>
 $(document).ready(function(){
     $('[data-domainselect]').change(function(){
-       var domain = $(this).attr("style", "padding: 0; background-color: orange;");
+       var domain = $(this).attr("data-domainselect");
        var types = $(this).selectpicker('val');
-       $('[data-domain="' + domain + '"]').attr("style", "padding: 0; background-color: orange;"); 
+       $('[data-domain="' + domain + '"]').attr("style", "padding: 0; background-color: transparent;"); 
        if (types !== null){
            $.each(types, function(index,value){
                 if (value){
@@ -140,6 +128,16 @@ $(document).ready(function(){
 
 </script>
 
+<div class="row-fluid">
+ <div class="btn-group" role="group">
+    <select class="selectpicker" data-style="btn btn-default" multiple data-actions-box="true" title="Highlight AT substrates" data-selected-text-format="count">
+      {% for rank in ranking %}
+      <option  data-domainselect="{{ rank.expertise }}" value="{{ rank.expertise }}"> {{ rank.expertise }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+
 <center>
 <table id="resultsTable" class="table table-hover table-condensed" style="margin: 0px auto;">
 <thead>
@@ -148,16 +146,13 @@ $(document).ready(function(){
         Hit 
     </th>
     <th>
-        Name
+        Field
+    </th>
+    <th>
+        Subfield
     </th>
     <th>
        Relevance Score
-    </th>
-    <th>
-       Institute
-    </th>
-    <th>
-       Expertise
     </th>
 </tr>
 </thead>
@@ -167,45 +162,26 @@ $(document).ready(function(){
 <!-- <tr class="clickable-row" data-container="body" data-href="/search/{{ rank.title }}/{% if alignment.hsps.0.modules|length > 0 %}?mark={% for module in alignment.hsps.0.modules %}{% if forloop.counter != 1 %},{% endif %}{{ module.module.order }}{% endfor %};{% endif %}#{{ alignment.subunit.name }}">
 
  -->
-<tr class="clickable-row" data-container="body" data-href="/search/{{ rank.professor }}/?authorID={{rank.id}}{% if forloop.counter != 1 %}{% endif %}">
+<tr class="clickable-row" data-container="body" data-href="/searchField/{{ rank.field }}~{{rank.subfield}}/?id={{rank.code}}&field={{rank.field}}&subfield={{rank.subfield}} {% if forloop.counter != 1 %},{% endif %}">
         <td info1=1 width=20>
             {{ forloop.counter }}
         </td>
         <td info2=2 width=20 tooltip= {{ forloop.counter }}>
-            {{ rank.professor }}
+            {{ rank.field }}
         </td>
         <td info3=3 width=20>
-            {{ rank.score }}
+            {{ rank.subfield }}
         </td>
         <td info4=4 width=20>
-            {{ rank.institute }}
+            {{ rank.score }}
         </td>
-        <td info5=5 width=20>
-            <mark data-domain="{{ rank.expertise }}"  data-type="{{ rank.expertise }}" style="padding:0; background-color: transparent;">{% if rank.expertise %}{{ rank.expertise }}{% else %} N/A {% endif %}</mark>
-          </td>
         
 </tr>
 {% endfor %}
 </tbody>
 </table>
 </center>
-<div class="container" style="padding-top: 50px">
-<center>
-<iframe src="/static/footer/haha.html" height="640" width="100%" style="border:none;">
-</iframe>
-</center>
-</div>
 
-{% for samples in legend %}
-<center>
-<div style="background-color:{{ samples.2 }};padding:5px;width:100px">
-<p>              </p>
-</div>
-<div>{{ samples.1 }}: </div>
-</center>
-
-            
-{% endfor %}
 
 <br/>
 <br>

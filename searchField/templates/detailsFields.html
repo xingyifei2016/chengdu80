@@ -54,33 +54,17 @@ sequence hits
 <h1> Query Result </h1>
 <br>
 <div class="row">
-    <div class="col-md-6">
-         <img src = {{imageurl1}} height= 300 >
-    </div>
-    <br>
     <div class="col-md-5">
-        <dt>Name</dt>
-        <dd><font face="Georgia" font size = "4" color="gray">{{ name }}</font></dd>
+        <dt>Field</dt>
+        <dd><font face="Georgia" font size = "5" color="gray">{{ field }}</font></dd>
     </div>
     <div class="col-md-5">
-        <dt>Page Rank</dt>
-        <dd><font face="Georgia" font size = "4" color="gray">{{ page }}</font></dd>
-    </div>
-    <div class="col-md-5">
-        <dt>Weighted Degree</dt>
-        <dd><font face="Georgia" font size = "4" color="gray">{{ weighted_degree }}</font></dd>
-    </div>
-    <div class="col-md-5">
-        <dt>Clustering</dt>
-        <dd><font face="Georgia" font size = "4" color="gray">{{ cluster }}</font></dd>
-    </div>
-    <div class="col-md-5">
-        <dt>Eigencentrality</dt>
-        <dd><font face="Georgia" font size = "4" color="gray">{{ eigen }}</font></dd>
+        <dt>Subfield</dt>
+        <dd><font face="Georgia" font size = "5" color="gray">{{ subfield }}</font></dd>
     </div>
     <div class="col-md-5">
         <dt>Search Time</dt>
-        <dd><font face="Georgia" font size = "4" color="gray">{{ timeTaken }} sec</font></dd>
+        <dd><font face="Georgia" font size = "5" color="gray">{{ timeTaken }} sec</font></dd>
     </div>
     </div>
 </div>
@@ -108,23 +92,19 @@ $(document).ready(function(){
 </script>
 
 
-<h2>Relevant Papers</h2>
+
+<h2>Related People</h2>
 <center>
 <div class="col-md-11">
 <table id="resultsTable" class="table table-hover table-condensed" style="margin: 0px auto;">
 <thead>
 <tr>
-    <th class="text-right">
-        Hit 
+
+    <th>
+        Name 
     </th>
-    <th class="text-right">
-       Coauthors
-    </th>
-    <th class="text-right">
-       Field
-    </th>
-    <th class="text-right">
-       Title
+    <th >
+       Citations
     </th>
 </tr>
 </thead>
@@ -134,18 +114,13 @@ $(document).ready(function(){
 <!-- <tr class="clickable-row" data-container="body" data-href="/search/{{ rank.title }}/{% if alignment.hsps.0.modules|length > 0 %}?mark={% for module in alignment.hsps.0.modules %}{% if forloop.counter != 1 %},{% endif %}{{ module.module.order }}{% endfor %};{% endif %}#{{ alignment.subunit.name }}">
 
  -->
-<tr class="clickable-row" data-container="body" data-href="/search/{{ rank.title }}/ {% if forloop.counter != 1 %},{% endif %}">
-        <td class="text-right">
-            {{ forloop.counter }}
+<tr class="clickable-row" data-container="body" data-href="/search/{{ rank.1 }}/?authorID={{ rank.0 }}">
+        
+        <td>
+            {{ rank.1 }}
         </td>
-        <td class="text-right">
-            {{ rank.coauthors }}
-        </td>
-        <td class="text-right">
-            {{ rank.field }}
-        </td>
-        <td class="text-right">
-            {{ rank.title }}
+        <td >
+            {{ rank.2 }}
         </td>
         
 </tr>
@@ -157,14 +132,5 @@ $(document).ready(function(){
 
 
 <br/>
-<br>
-<center><h2> Collaboration Network </h2></center>
-<div class="container" style="padding-top: 50px">
-<center>
-<iframe src="/static/footer/haha.html" height="640" width="100%" style="border:none;">
-</iframe>
-</center>
-</div>
-</div>
 
 {% endblock %}

@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'search.apps.SearchConfig',
+    'searchField.apps.SearchfieldConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
