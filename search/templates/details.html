@@ -108,6 +108,18 @@ $('[info11]').tooltip({
   trigger: 'hover',
   container : 'body'
 });
+
+$('[info12]').tooltip({
+  title: "An author-level metric that measures the productivity and citation impact of a scholar: Formally, it is the maximum value of h such that the author has published h papers that have been cited at least h times",
+  trigger: 'hover',
+  container : 'body'
+});
+
+$('[info13]').tooltip({
+  title: "An author-level metric that measures the citation impact of a scholar: It is defined as the number of the author’s publications that have been cited at least 10 times",
+  trigger: 'hover',
+  container : 'body'
+});
 </script>
 
 {% endblock %}
@@ -132,6 +144,15 @@ sequence hits
         <dt>Institute</dt>
         <dd><font face="Georgia" font size = "3" color="gray" info2=2>{{ research.Institute }}</font></dd>
     </div>
+    <div class="col-md-5">
+        <dt>H Index</dt>
+        <dd><font face="Georgia" font size = "3" color="gray" info12=12>{{ h }}</font></dd>
+    </div>
+    <div class="col-md-5">
+        <dt>I-10 Index</dt>
+        <dd><font face="Georgia" font size = "3" color="gray" info13=13>{{ i_10 }}</font></dd>
+    </div>
+
     <div class="col-md-5">
         <dt>Page Rank</dt>
         <dd><font face="Georgia" font size = "3" color="gray" info3=3>{{ page }}</font></dd>

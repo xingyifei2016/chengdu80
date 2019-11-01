@@ -29,6 +29,8 @@ searched_query = {i: [] for i in all_fields}
 searched_query["results"] = {}
 default_researchers = ['John Denero-2936600175', 'Tze Leung Lai-2117483097', 'Alexei A. Efros-2088536091']
 df = pd.read_csv('./static/footer/nodup_joined.csv')
+df2 = pd.read_csv('./static/footer/h5.csv')
+
 
 with open(authors_base, 'rb') as f:
     data_author = pickle.load(f)
@@ -44,6 +46,7 @@ def details(request):
     timeTaken = time()
     authorID = request.GET['authorID']
     query = df.loc[df['author_id'] == np.float64(authorID)]
+    query2 = df2.loc[df2['author_id'] == np.float64(authorID)]
     if len(query) == 0:
         messages.error(request, 'Error: No researchers matched from database')
         if len(searched_query['researchName']) == 0:
@@ -92,6 +95,16 @@ def details(request):
     name = query['name'].values[0]
     end_time = time()
     timeTaken = int(end_time - timeTaken)
+    if len(query2) == 0:
+        h_index='N/A'
+        i_10 = 'N/A'
+    else:
+        try:
+            h_index=int(query2['h_index'].values[0])
+            i_10=int(query2['i_10_index'].values[0])
+        except ValueError:
+            h_index=query2['h_index'].values[0]
+            i_10=query2['i_10_index'].values[0]
     context = {
         'imageurl1': image_url1,
         'imageurl2': image_url2,
@@ -108,6 +121,8 @@ def details(request):
         'interest': interest,
         'recommend': recommend,
         'collab': collab,
+        'h': h_index,
+        'i_10': i_10,
         }
     return render(request, 'details.html', context)
 
