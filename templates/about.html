@@ -2,93 +2,33 @@
 
 {% block content %}
 <div class="row-fluid">
-<h3>Introduction</h3>
 
-The goal of ClusterCAD is to facilitate the informed design of chimeric type I modular PKSs in order to achieve the microbial production of novel drug analogs and industrially relevant small molecules. The synthetic biology community has long maintained an interest in polyketide synthases, as their modular nature suggests that their biosynthetic power can be harnessed for combinatorial biosynthesis. Previous work has demonstrated that it is possible to construct functional chimeric PKSs by exchanging catalytic domains between heterologous PKS modules. However, limitations in the theoretical understanding of the complex protein-protein interactions that govern the fold and function of natural and engineered PKSs mean that identifying strategies to reliably design functional PKS chimeras remains an open research problem. In this work, we assume a specific paradigm for domain exchanges, and further provide a database with advanced search capabilities aimed at smoothing the process of testing PKS design strategies.
 
-<h3>Index</h3>
+
+<p><strong>What is new in v1.03</strong></p> <ul> <li><p><strong>Trending Researchers</strong> function is now available. The most popular researchers based on all users` search history will be listed there.</p> </li><li><p><strong>Recommended Researchers</strong> area in individual researcher`s page is now available. A list of recommended researchers will be displayed based on the researcher¡¯s past collaborations and publications.</p></li></ul>
+
+<hr class="page-break editormd-page-break" style="page-break-after:always;"><h2 id="h2-features"><a name="Features" class="reference-link"></a><span class="header-link octicon octicon-link"></span>
+<h2>Index</h2>
 <ol>
-<li class="roman"><a href="#exchange">Domain exchange paradigm</a></li>
-<li class="roman"><a href="#database">Description of database</a></li>
-<li class="roman"><a href="#browse">Browsing clusters</a></li>
-<li class="roman"><a href="#structure">Structure search</a></li>
-<li class="roman"><a href="#sequence">Sequence search</a></li>
-<li class="roman"><a href="#citation">Citing ClusterCAD</a></li>
+<li class="roman"><a href="#overview">Overview</a></li>
+<li class="roman"><a href="#features">Features Handbook</a></li>
 </ol>
 
+<hr class="page-break editormd-page-break" style="page-break-after:always;"><h2 id="h2-features"><a name="Features" class="reference-link"></a><span class="header-link octicon octicon-link"></span>
+
+<a name="overview"></a>
+<h2>Overview of FREE</h2>
 
 
-<a name="exchange"></a>
-<h3>Domain exchange paradigm</h3>
+<p><a href="/">FREE</a> is more than an open-sourced financial researcher search engine. Packed with cutting-edge data analytics techniques, such as unsupervised statistical learning, knowledge graph embedding and network analysis, along with many compelling interactive visualizations, FREE can demonstrate a complete and vivid picture of the world of research -- What is a certain researcher most known for? What are the research trends now? How does each research community look like? </p>
 
-<p>Type I modular polyketide synthases have a unique modular structure in which the product of each module, and therefore each megasynthase, is determined by the catalytic domains that comprise each module. This modular nature allows us to predict polyketide intermediates and final products using only the sequence of catalytic domains in the cognate PKS. This unusual property has fueled significant research efforts to use engineered PKSs combinatorial biosynthesis.</p>
+<p>We have listed a few key features of FREE below.</p> <h4 id="h4-complete"><a name="Complete" class="reference-link"></a><span class="header-link octicon octicon-link"></span>Complete</h4><p>FREE contains information of an astounishingly <strong>26,670</strong> researchers, <strong>1,904,355</strong> publications in <strong>138</strong> different fields of financial research.</p> <h4 id="h4-fast"><a name="Fast" class="reference-link"></a><span class="header-link octicon octicon-link"></span>Fast</h4><p>FREE is lightning fast, each search query takes less than 0.001s to respond.</p> <h4 id="h4-detailed"><a name="Detailed" class="reference-link"></a><span class="header-link octicon octicon-link"></span>Detailed</h4><p>FREE provides detailed analytics of each individual researcher and research field. For each researcher, we provide a detailed summarization and analysis of his / her research life: relevant papers, research interest, collaborative network, impact graph, citation statistics, potential relevant researchers, etc. For each field, we provide a detailed summarization and analysis of this field: community networks, key researchers, key publications, etc.</p> <h4 id="h4-user-friendly"><a name="User-Friendly" class="reference-link"></a><span class="header-link octicon octicon-link"></span>User-Friendly</h4><p>FREE gives intuitive explanations of all statistical terms, i.e. what is this statistics measuring? Also, many figures in FREE are interactive, so that users may find their own desired piece of information.</p> <hr class="page-break editormd-page-break" style="page-break-after:always;"><h2 id="h2-features"><a name="Features" class="reference-link"></a><span class="header-link octicon octicon-link"></span>
 
-<p>Due to the complicated nature of protein-protein interactions, one heuristic that is commonly used in PKS engineering is to seek to design chimeric PKSs that are as close to a naturally occuring PKS as possible. Using this guiding principle, we propose the following paradigm for designing a chimeric PKS capable of producing a small molecule compound of interest:</p>
 
-<ol>
-    <li>Identify truncated PKS as a starting point for engineering by searching for a module with a known intermediate that as structurally similar to the compound of interest as possible</li>
-    <li>Determine what domain exchanges are required to obtain the product of interest</li>
-    <li>Choose donor catalytic domains on basis of sequence similarity to the truncated PKS starting point</li>
-</ol>
-
-<p>If the target is a natural product analog, a starting point does not need to be identified, and ClusterCAD can be applied to simply select donor catalytic domains required to effect the desired structural changes in the final polyketide product. While the goal of ClusterCAD is to identify <i>potential</i> parent PKS starting points and donor catalytic domains, it will likely prove important to consider additional factors when designing a chimeric PKSs. For example, modules from well-characterized clusters, particularly modules that have previously been determined to be well-expressed in the host organism of choice, are particularly attractive choices for engineering. We therefore emphasize that ClusterCAD is intended to augment, rather than supercede, the expert domain knowledge of the experienced PKS researcher.</p>
-
-<a name="database"></a>
-<h3>Description of database</h3>
-
-<p>ClusterCAD is based on the <a href="http://mibig.secondarymetabolites.org/">Minimum Information about a Biosynthetic Gene cluster (MIBiG) database</a>. In order to construct the database entries for ClusterCAD, we first identified the MIBiG entries that were annotated as type I modular PKS clusters. Annotations for these clusters were generated using <a href=https://antismash.secondarymetabolites.org/>the antibiotics and Secondary Metabolite Analysis SHell (antiSMASH) software</a>. The resulting output was parsed using a whitelist of recognized catalytic domains in order to truncate analysis of each cluster at a subunit containing a non-ribosomal peptide synthethase (NRPS) or another unusual catalytic domain that is otherwise not supported by ClusterCAD. Domain annotations, which include predictions for acyltransferase (AT) domain substrate specificity and ketoreductase (KR) domain stereochemical outcome, were then used to generate predictions of the polyketide intermediates expected to be produced by each module in the PKS cluster.</p>
-
-<p>In order to validate the intermediate and final structure predictions, the predicted final structure was compared against the known final structure. SMILES structures for known file products were taken from the MIBiG database, or were identified using the ChemAxon Naming tool using the text description of the final structure from MIBiG. Finally, additional structures were obtained by a literature search and manually incorporated into ClusterCAD.</p>
-
-<p>A comparison between the predicted in known final structures was used to manually curate each ClusterCAD entry to perform the following corrections:</p>
-<ul>
-    <li>Remove invalid subunits</li>
-    <li>Correct subunit order</li>
-    <li>Correct mis-annotated AT specificity or KR stereochemical outcome</li>
-    <li>Correct annotations describing whether or not KR, DH, and ER domains are active</li>
-    <li>Account for iterating modules</li>
-    <li>Correct annotations describing whether TE domains generate cyclized or linear products</li>
-</ul>
-
-<a name="structure"></a>
-<h3>Database entries</h3>
-
-<p>The entry for each cluster contains links to the corresponding MiBiG database and NCBI Nucleotide database entries. Buttons to display annotations of AT substrate specificity and KR stereochemical outcome are also provided. Clicking on the final product or polyketide intermediate chemical structures will display SMILES representations of these structures. Further, clicking on the name of the module will provide links to the NCBI Protein database entry for that module, the nucleotide and amino acid sequences for the module, and precomputed secondary structure and relative solvent accessibility annotations.</p>
-<p>Note that AT substrates with an "_ACP" suffix in the name represent ACP linked substrates, whereas those without a suffix represent CoA linked substrates.</p>
-
-<a name="structure"></a>
-<h3>Structure search</h3>
-
-<p>The structure search tool was designed to enable the identification of a truncated PKS to use as a starting point for PKS engineering, and takes as input a small molecule chemical structure in the form of a <a href="http://www.daylight.com/dayhtml/doc/theory/theory.smiles.html">SMILES string</a> or a structure that is drawn in an interactive GUI. Matches to the query structure are ranked using AP (atom pair) descriptors and the Tanimoto coefficient similarity metric.</p> 
-
-<a name="sequence"></a>
-<h3>Sequence search</h3>
-
-<p>The sequence search tool was designed to enable researchers to select donor catalytic domains for domain exchange experiments. The tool was designed to enabled flexible queries, allowing researchers to test hypotheses regarding which domain-domain interactions may be important in facilitating successful domain exchanges. The sequence search tool takes as input a valid amino acid sequence, and performs a Blast search against a Blast database containing all of the subunits in ClusterCAD.</p> 
+<a name="features"></a>
+<h2>Features of FREE</h2>
     
-<a name="citation"></a>
-<h3>Citing ClusterCAD</h3>
-<dl>
-
-<dt>Please cite the following publication if you use ClusterCAD for published research:</dt>
-<dd><p>
-ClusterCAD: a computational platform for type I modular polyketide synthase design.</br>
-Eng, C.H.*, Backman, T.W.H.*, Bailey, C.B., Magnan, C., Martin, H.G., Katz, L., Baldi, P., Keasling, J.D.</br>
-<i>Nucleic Acids Research</i>, 2017 Oct. <a href="https://doi.org/10.1093/nar/gkx893">https://doi.org/10.1093/nar/gkx893</a></br>
-*co-first authors
-</p></dd>
-
-<dt>Software</dt>
-<dd>ClusterCAD is open source software that can be freely downloaded under a BSD style license at <a href="https://github.com/JBEI/clusterCAD">https://github.com/JBEI/clusterCAD</a>. ClusterCAD utilizes the following open source software:</dd>
-<ul>
-    <li>Bootstrap</li>
-    <li>ChemDoodle</li>
-    <li>PostgreSQL</li>
-    <li>Python</li>
-    <li>Django</li>
-    <li>RDKit</li>
-</ul>
-</dl>
+<p>We provide two ways of searching, by researchers or by fields. Our search is lightning fast and each page contains rich information regarding the desired unit.</p> <h3 id="h3-search-for-researchers"><a name="Search for Researchers" class="reference-link"></a><span class="header-link octicon octicon-link"></span>Search for Researchers</h3><p>Please use <a href="/search/">this link</a> to jump to the researcher search page. Alternatively, you may click "Search by Name" on the top menu bar.</p> <p>You may search your desired researcher based on his / her name, institute affiliation, and / or expertise. For example, if you are interested in Professor <a href="http://www.eecs.berkeley.edu/Faculty/Homepages/denero.html">John Denero</a> of <a href="https://eecs.berkeley.edu/"> Electrical Engineering and Computer Science department</a> in <a href="https://www.berkeley.edu">University of California, Berkeley</a>, you may input "John Denero" in the Name field, "Berkeley" in Institute field and "Computer Science" in the Expertise field. And the first returned unit is Professor John Denero`s page in FREE engine. </p> <p>If instead of identifying the information of an exact Professor, you want to explore Professors in certain expertise. FREE also gets you covered! For example, you may simply type "financial engineering" in Expertise to get a list of Professors who work in this field. And if you want to specify Professors in University of California, Berkeley working on financial engineering, you may input "financial engineering" in Expertise and "berkeley" in Institute. Good luck exploring!</p> <p>You may take a look at a sample page <a href="/search/John%20DeNero/?authorID=2936600175">here</a>.</p> <h3 id="h3-search-for-fields"><a name="Search for Fields" class="reference-link"></a><span class="header-link octicon octicon-link"></span>Search for Fields</h3><p>Please use <a href="/searchField/">this link</a> to jump to the field search page. Alternatively, you may click "Search by Field" on the top menu bar.</p> <p>You may search your interested field based on American Economics Association`s <a href="https://www.aeaweb.org/jel/jel_class_system.php">JEL classification code</a>. Here, we only include category and sub-category. For example, if you are interested in quantitative economics and especially single equation methods, you may input "quantitative" in Field and "single equation" in Subfield.</p> <p>You may take a look at a sample page of a field`s page <a href="/searchField/Agricultural%20and%20Natural%20Resource%20Economics;%20Environmental%20and%20Ecological%20Economics~Energy/?id=Q40&field=Agricultural%20and%20Natural%20Resource%20Economics;%20Environmental%20and%20Ecological%20Economics&subfield=Energy">here</a>.</p> <h3 id="h3-trending-researchers"><a name="Trending Researchers" class="reference-link"></a><span class="header-link octicon octicon-link"></span>Trending Researchers</h3><p>This area denotes the mostly searched researchers from all FREE users. You may explore these popular reseacher's page by clicking their names.</p> <hr class="page-break editormd-page-break" style="page-break-after:always;"><h2 id="h2-sample-page-explanations"><a name="Sample Page Explanations" class="reference-link"></a><span class="header-link octicon octicon-link"></span>
 
 </div>
 {% endblock %}

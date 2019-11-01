@@ -43,7 +43,7 @@ $(document).ready(function()
 ); 
 
 $('[info1]').tooltip({
-  title: "This is the position of which the person was returned by our system",
+  title: "This is the order of which the field was returned by our system",
   trigger: 'hover',
   container : 'body'
 });
@@ -128,14 +128,6 @@ $(document).ready(function(){
 
 </script>
 
-<div class="row-fluid">
- <div class="btn-group" role="group">
-    <select class="selectpicker" data-style="btn btn-default" multiple data-actions-box="true" title="Highlight AT substrates" data-selected-text-format="count">
-      {% for rank in ranking %}
-      <option  data-domainselect="{{ rank.expertise }}" value="{{ rank.expertise }}"> {{ rank.expertise }}</option>
-      {% endfor %}
-    </select>
-  </div>
 
 
 <center>

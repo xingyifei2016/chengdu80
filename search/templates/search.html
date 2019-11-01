@@ -103,9 +103,9 @@ return false;
 
 <br>
 
-<p>Recommended searches: 
+<p>Trending Researchers: 
     {% for member in researchers %}
-    <li><a href="/search/{{ member }}/">{{member}}</a></li>
+    <li><a href="/search/{{ member.0 }}/?authorID={{ member.1 }}">{{member.0}}</a></li>
     {% endfor %}
 </p>
 

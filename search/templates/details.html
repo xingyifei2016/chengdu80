@@ -41,6 +41,73 @@ $(document).ready(function()
         }); 
     } 
 ); 
+
+
+$('[info1]').tooltip({
+  title: "Name of the Researcher",
+  trigger: 'hover',
+  container : 'body'
+});
+
+$('[info2]').tooltip({
+  title: "Institute of which this Researcher Belongs",
+  trigger: 'hover',
+  container : 'body'
+});
+
+$('[info3]').tooltip({
+  title: "A measure of the relative importance of a node (scholar) in the collaborative network. Based on the PageRank algorithm used by Google search, every scholar is assigned a rank based on the number and quality of co-authorship links the scholar has to other scholars",
+  trigger: 'hover',
+  container : 'body'
+});
+
+$('[info4]').tooltip({
+  title: "A weighted sum of the co-authorship connections for each scholar weighted by the number of publications shared with each co-author",
+  trigger: 'hover',
+  container : 'body'
+});
+
+$('[info5]').tooltip({
+  title: "A measure of the influence of a node (scholar) in the collaborative network. This is calculated using a weighted sum of the eigenvectors of an adjacency matrix based on co-authorship. A higher eigencentrality value corresponds to higher importance of a researcher within the network",
+  trigger: 'hover',
+  container : 'body'
+});
+
+$('[info6]').tooltip({
+  title: "A local clustering coefficient that quantifies how embedded a node (scholar) is within the network or in other words, how much a specific scholar tends to cluster with other scholars when collaborating",
+  trigger: 'hover',
+  container : 'body'
+});
+
+$('[info7]').tooltip({
+  title: "The average number of times a scholar’s collaborators have been cited",
+  trigger: 'hover',
+  container : 'body'
+});
+
+$('[info8]').tooltip({
+  title: "The average number of publications of a scholar’s coauthors",
+  trigger: 'hover',
+  container : 'body'
+});
+
+$('[info9]').tooltip({
+  title: "Field(s) of individual's the most cited papers",
+  trigger: 'hover',
+  container : 'body'
+});
+
+$('[info10]').tooltip({
+  title: "Number of Publications measures the amount of paper published at each year; Number of Citations measures the incremental number of citation in each year",
+  trigger: 'hover',
+  container : 'body'
+});
+
+$('[info11]').tooltip({
+  title: "Average Impact Number measures the average citation number of it's journal",
+  trigger: 'hover',
+  container : 'body'
+});
 </script>
 
 {% endblock %}
@@ -55,57 +122,76 @@ sequence hits
 <br>
 <div class="row">
     <div class="col-md-6">
-         <img src = {{imageurl1}} height= 300 >
+         <img src = {{imageurl1}} onerror="this.src='/static/footer/study.jpeg'" width= 320 >
     </div>
-    <br>
     <div class="col-md-5">
         <dt>Name</dt>
-        <dd><font face="Georgia" font size = "4" color="gray">{{ name }}</font></dd>
+        <dd><font face="Georgia" font size = "3" color="gray" info1=1>{{ name }}</font></dd>
+    </div>
+    <div class="col-md-5">
+        <dt>Institute</dt>
+        <dd><font face="Georgia" font size = "3" color="gray" info2=2>{{ research.Institute }}</font></dd>
     </div>
     <div class="col-md-5">
         <dt>Page Rank</dt>
-        <dd><font face="Georgia" font size = "4" color="gray">{{ page }}</font></dd>
+        <dd><font face="Georgia" font size = "3" color="gray" info3=3>{{ page }}</font></dd>
     </div>
     <div class="col-md-5">
         <dt>Weighted Degree</dt>
-        <dd><font face="Georgia" font size = "4" color="gray">{{ weighted_degree }}</font></dd>
+        <dd><font face="Georgia" font size = "3" color="gray" info4=4>{{ weighted_degree }}</font></dd>
     </div>
     <div class="col-md-5">
         <dt>Clustering</dt>
-        <dd><font face="Georgia" font size = "4" color="gray">{{ cluster }}</font></dd>
+        <dd><font face="Georgia" font size = "3" color="gray" info6=6>{{ cluster }}</font></dd>
     </div>
     <div class="col-md-5">
         <dt>Eigencentrality</dt>
-        <dd><font face="Georgia" font size = "4" color="gray">{{ eigen }}</font></dd>
+        <dd><font face="Georgia" font size = "3" color="gray" info5=5>{{ eigen }}</font></dd>
     </div>
     <div class="col-md-5">
-        <dt>Search Time</dt>
-        <dd><font face="Georgia" font size = "4" color="gray">{{ timeTaken }} sec</font></dd>
+        <dt>Coauthor Average Citations</dt>
+        <dd><font face="Georgia" font size = "3" color="gray" info7=7>{{ avg_cit }}</font></dd>
     </div>
+    <div class="col-md-5">
+        <dt>Coauthor Average Publications</dt>
+        <dd><font face="Georgia" font size = "3" color="gray" info8=8>{{ avg_pub }}</font></dd>
     </div>
 </div>
 
 <br>
 
-<script>
-$(document).ready(function(){
-    $('[data-domainselect]').change(function(){
-       var domain = $(this).attr("data-domainselect");
-       var types = $(this).selectpicker('val');
-       $('[data-domain="' + domain + '"]').attr("style", "padding: 0; background-color: transparent;"); 
-       if (types !== null){
-           $.each(types, function(index,value){
-                if (value){
-                    $('[data-domain="' + domain + '"][data-type="' + value + '"]').attr("style", "padding: 0; background-color: orange;"); 
-                }
-           });
-       }
-       // update table cache and re-sort each time highlights are changed
-       var sortlist = [[7,1], [0,0]]
-       $("#resultsTable").trigger("update").trigger("sorton", [sortlist]);
-    });
-});
-</script>
+<div class="row">
+    <div class="col-md-5">
+        <dt>Research Interest(s)</dt>
+        <dd>{{ interest }}</dd>
+    </div>
+    <div class="col-md-5">
+        <dt info9=9>Hot spot(s)</dt>
+        {% for items in research.HotSpots %}
+        <dd>{{ items.0 }} - {{ items.1 }}</dd>
+        {% endfor %}
+    </div>
+</div>
+<br>
+<div class="row">
+    <div class="col-md-5">
+<p><dt>Related Researcher(s):</dt> 
+    {% for member in recommend %}
+    <li><a href="/search/{{ member.0 }}/?authorID={{ member.1 }}">{{member.0}}</a></li>
+    {% endfor %}
+</p>
+</div>
+
+    <div class="col-md-5">
+<p><dt>Top Collaborated Researcher(s):</dt> 
+    {% for member in collab %}
+    <li><a href="/search/{{ member.0 }}/?authorID={{ member.1 }}">{{member.0}}</a></li>
+    {% endfor %}
+</p>
+</div>
+</div>
+
+<br>
 
 
 <h2>Relevant Papers</h2>
@@ -114,57 +200,52 @@ $(document).ready(function(){
 <table id="resultsTable" class="table table-hover table-condensed" style="margin: 0px auto;">
 <thead>
 <tr>
-    <th class="text-right">
-        Hit 
+    <th>
+       Paper Info
     </th>
     <th class="text-right">
-       Coauthors
-    </th>
-    <th class="text-right">
-       Field
-    </th>
-    <th class="text-right">
-       Title
+       Citations
     </th>
 </tr>
 </thead>
 <tbody>
-{% for rank in ranking %}
-
-<!-- <tr class="clickable-row" data-container="body" data-href="/search/{{ rank.title }}/{% if alignment.hsps.0.modules|length > 0 %}?mark={% for module in alignment.hsps.0.modules %}{% if forloop.counter != 1 %},{% endif %}{{ module.module.order }}{% endfor %};{% endif %}#{{ alignment.subunit.name }}">
-
- -->
-<tr class="clickable-row" data-container="body" data-href="/search/{{ rank.title }}/ {% if forloop.counter != 1 %},{% endif %}">
-        <td class="text-right">
-            {{ forloop.counter }}
-        </td>
-        <td class="text-right">
-            {{ rank.coauthors }}
-        </td>
-        <td class="text-right">
-            {{ rank.field }}
-        </td>
-        <td class="text-right">
-            {{ rank.title }}
-        </td>
-        
+{% for paper in research.MostCitedPapers %}
+<tr>
+    <td>
+        {{ paper.0 }}
+    </td>
+    <td class="text-right">
+        {{ paper.1 }}
+    </td>
 </tr>
+
 {% endfor %}
 </tbody>
 </table>
 </div>
 </center>
-
+<br>
+<center><img src="/static/footer/half.png" width=20%></center>
 
 <br/>
-<br>
 <center><h2> Collaboration Network </h2></center>
 <div class="container" style="padding-top: 50px">
 <center>
-<iframe src="/static/footer/haha.html" height="640" width="100%" style="border:none;">
+<iframe src="/static/footer/html_img/{{ id }}.html" height="640" width="100%" style="border:none;">
 </iframe>
+<!-- <center><img src="/static/footer/half.png" width=100%></center> -->
+<center><h2 info10=10> Publication Citation Graph </h2></center>
+<img src="/static/footer/cp/Citation_Publication{{ id }}.png" onerror="this.src='/static/footer/cp/Citation_Publication33645406.png'" width="100%">
 </center>
+<br>
+<center><h2 info11=11> Average Impact Graph </h2></center>
+<img src="/static/footer/avg_impact/{{ id }}.png" onerror="this.src='/static/footer/avg_impact/117180.png'" width="100%">
+</center>
+
+
 </div>
 </div>
+
+
 
 {% endblock %}

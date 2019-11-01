@@ -12,8 +12,8 @@ sequence search
 {% block js_content %}
 <script type="text/javascript">
 function do_example(){
-   $("#fieldName").val('Computer Science');
-   $("#subfieldName").val('Computer Vision');
+   $("#fieldName").val('Economics');
+   $("#subfieldName").val('Energy');
 }
 $(document).ready(function() {
 $("#loadexample").click(function() {
@@ -74,9 +74,9 @@ return false;
 
 <br>
 
-<p>Recommended searches: 
+<p>Trending Fields: 
     {% for member in fields %}
-    <li><a href="/search/{{ member }}/">{{member}}</a></li>
+    <li><a href="/searchField/{{ member.0 }}/?id={{member.2}}&field={{member.0}}&subfield={{member.1}}">{{member.0}}</a></li>
     {% endfor %}
 </p>
 
